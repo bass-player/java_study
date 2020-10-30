@@ -1,11 +1,11 @@
 package red.reid.common.test;
 
+import one.rewind.db.RedissonAdapter;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.junit.Test;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RMap;
-import red.reid.common.RedissonAdapter;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -16,13 +16,13 @@ import java.util.concurrent.TimeUnit;
 public class RedissonAdapterTest {
 
 	// https://github.com/redisson/redisson/wiki/7.-distributed-collections
-	RMap<String, String> map = RedissonAdapter.redisson.getMap("Test-Map");
+	RMap<String, String> map = RedissonAdapter.get("local").getMap("Test-Map");
 
 	//
-	RBlockingQueue<String> queue = RedissonAdapter.redisson.getBlockingQueue("Test-Queue");
+	RBlockingQueue<String> queue = RedissonAdapter.get("local").getBlockingQueue("Test-Queue");
 
 	// https://github.com/redisson/redisson/wiki/6.-distributed-objects
-	RAtomicLong atomicLong = RedissonAdapter.redisson.getAtomicLong("Test-Atomic-Long");
+	RAtomicLong atomicLong = RedissonAdapter.get("local").getAtomicLong("Test-Atomic-Long");
 
 	/**
 	 * 测试RMap的远程写入
@@ -84,5 +84,4 @@ public class RedissonAdapterTest {
 
 		countDownLatch.await();
 	}
-
 }

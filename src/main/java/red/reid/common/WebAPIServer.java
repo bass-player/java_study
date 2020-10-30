@@ -8,12 +8,14 @@ import org.apache.logging.log4j.Logger;
 
 import static spark.Spark.*;
 
+/**
+ * https://github.com/perwendel/spark
+ */
 public class WebAPIServer {
 
 	private static final Logger logger = LogManager.getLogger(WebAPIServer.class.getName());
 
 	private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
 
 	public WebAPIServer() {
 		port(10000);
