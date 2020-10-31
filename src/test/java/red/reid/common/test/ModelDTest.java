@@ -13,16 +13,21 @@ import one.rewind.db.model.ModelD;
 import one.rewind.db.model.ModelL;
 import one.rewind.db.util.Refactor;
 import one.rewind.json.JSON;
+import one.rewind.util.DateFormatUtil;
 import one.rewind.util.StringUtil;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+/**
+ * https://ormlite.com/javadoc/ormlite-core/doc-files/ormlite_1.html#Getting-Started
+ */
 public class ModelDTest {
 
 	@Test
@@ -81,7 +86,7 @@ public class ModelDTest {
 		ModelC mc_ = dao.queryForId(mc.id);
 		System.out.println(mc_.toJSON());*/
 
-		ModelC mc_ = Daos.get(ModelC.class).queryForId(mc.id);
+		ModelC mc_ = /*Daos.get(ModelC.class).queryForId(mc.id)*/ ModelC.getById(ModelC.class, mc.id);
 		System.out.println(mc_.toJSON());
 	}
 
@@ -123,13 +128,19 @@ public class ModelDTest {
 
 		@Test
 		public void testInsertSql() throws DBInitException, SQLException {
+
+			/*ModelA ma = new ModelA(0);
+			ma.text = "Text";
+			ma.media_id = "FFFF";
+			ma.insert();*/
+
 			List<ModelA> ms = new ArrayList<>();
-			for(int i=0; i<10; i++) {
+			for(int i=0; i<100; i++) {
 				ModelA ma = new ModelA(i);
 				ms.add(ma);
 			}
 
-			// Model.batchInsert(ms);
+			Model.batchInsert(ms);
 		}
 
 		@Test
@@ -142,6 +153,7 @@ public class ModelDTest {
 			Refactor.createTable(ModelA.class);
 
 			for(int i=0; i<10; i++) {
+
 				ModelA ma = new ModelA(i);
 				ma.insert();
 
@@ -152,12 +164,25 @@ public class ModelDTest {
 		}
 
 		@Test
+		public void testQuery0() throws DBInitException, SQLException, InterruptedException {
+
+			// https://ormlite.com/javadoc/ormlite-core/doc-files/ormlite_3.html#Statement-Builder
+			QueryBuilder<ModelA, Object> qb = Daos.get(ModelA.class).queryBuilder();
+
+			qb.where().gt("update_time", DateFormatUtil.parseTime("2020-10-31 19:55:33")).and().le("update_time", DateFormatUtil.parseTime("2020-10-31 19:55:34"));
+
+			qb.query().stream().forEach(m -> {
+				System.err.println(m.toJSON());
+			});
+		}
+
+		@Test
 		public void testQuery() throws DBInitException, SQLException, InterruptedException {
 
 			QueryBuilder<ModelB, Object> qb = Daos.get(ModelB.class).queryBuilder();
 			QueryBuilder<ModelA, Object> qa = Daos.get(ModelA.class).queryBuilder();
 
-			qa.setWhere(qa.where().eq("num", 1));
+			qa.setWhere(qa.where().eq("platform_id", 1));
 			qb.setWhere(qb.where().eq("num", 0));
 
 			List<ModelB> mbs = qb.join(qa).query();
@@ -172,17 +197,17 @@ public class ModelDTest {
 
 			try {
 				TransactionManager.callInTransaction(
-						Daos.get(ModelB.class).getConnectionSource(),
-						(Callable<Void>) () -> {
+					Daos.get(ModelB.class).getConnectionSource(),
+					(Callable<Void>) () -> {
 
-							ModelA ma = new ModelA(1);
-							ma.insert();
+						ModelA ma = new ModelA(1);
+						ma.insert();
 
-							ModelB mb = new ModelB();
-							mb.ma = ma;
-							mb.insert();
-							return null;
-						}
+						ModelB mb = new ModelB();
+						mb.ma = ma;
+						mb.insert();
+						return null;
+					}
 				);
 			} catch (Exception ex) {
 				ex.printStackTrace();

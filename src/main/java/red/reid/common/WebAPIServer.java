@@ -21,6 +21,9 @@ public class WebAPIServer {
 		port(10000);
 	}
 
+	/**
+	 * https://sparkjava.com/documentation#routes
+	 */
 	public void buildRoutes() {
 
 		before("/*", (q, a) -> logger.info("Received api call"));
